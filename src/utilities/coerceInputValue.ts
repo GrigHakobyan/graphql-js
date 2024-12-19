@@ -73,6 +73,18 @@ function coerceInputValueImpl(
     return null;
   }
 
+  if (!isListType(type) && isIterableObject(inputValue)) {
+    const itemType = type;
+    if (isIterableObject(inputValue)) {
+      return Array.from(inputValue, (itemValue, index) => {
+        const itemPath = addPath(path, index, undefined);
+        return coerceInputValueImpl(itemValue, itemType, onError, itemPath);
+      });
+    }
+    // Lists accept a non-list value as a list of one.
+    return [coerceInputValueImpl(inputValue, itemType, onError, path)];
+  }
+
   if (isListType(type)) {
     const itemType = type.ofType;
     if (isIterableObject(inputValue)) {
